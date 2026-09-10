@@ -225,4 +225,7 @@ docs/                     架构、数据契约、模型与运行说明
 
 本项目复用 [changedetection.io](https://github.com/dgtlmoon/changedetection.io)、[Selenium Docker](https://github.com/SeleniumHQ/docker-selenium)、[Playwright](https://github.com/microsoft/playwright) 以及 FastAPI、SQLAlchemy、PostGIS、Redis/RQ、Next.js 等组件。它们解决浏览器、变化检测和基础设施问题，不自带上海房源授权或成交数据。
 
-许可证在公开发布前由维护者确认；整理阶段不擅自为第三方代码或数据授予许可。
+## 许可证
+
+本项目源代码采用 [MIT License](LICENSE)，版权归 lxhuye 所有。第三方依赖保留各自许可证。
+该许可不包含房源网站、地图、统计材料或合作方数据的获取与再分发授权。

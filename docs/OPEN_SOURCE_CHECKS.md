@@ -39,3 +39,10 @@ Python 检查在已有 Python 3.12 测试镜像中离线运行。数据库测试
 - 未在公网部署，未进行完整依赖漏洞或渗透审计。
 
 每次后续发布仍应在新快照上重跑检查，并以 GitHub 当前提交的 CI 结果为准。
+
+## GitHub CI
+
+初始源码提交 `5e4f4fd5a177aa0885987bdc3d36a7755de81e2a` 的
+[GitHub CI](https://github.com/lxhuye/shanghai-home-radar/actions/runs/34426675906)
+已通过，包含后端安装、迁移、规范与测试，以及前端安装、检查与构建。
+后续许可证与文档提交应查看对应运行，不能沿用此提交的状态。
