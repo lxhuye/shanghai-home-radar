@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HouseRadar · 房源监控</title>
+<style>
+body{font:17px/1.7 system-ui,sans-serif;background:#f5f5f1;color:#18352c;margin:0;padding:36px 24px}
+main{max-width:900px;margin:auto}h1{font-size:32px;margin:8px 0}p{margin:12px 0}.muted{color:#536b62}
+.card{background:white;padding:24px;border:1px solid #d9e1d8;border-radius:16px;margin:24px 0}
+button,a.button{font:inherit;display:inline-block;border:1px solid #285945;border-radius:8px;padding:9px 15px;margin:6px 8px 6px 0;background:#fff;color:#184431;text-decoration:none;cursor:pointer}
+button.primary{background:#285945;color:white}button:disabled{opacity:.4;cursor:wait}#reason{font-size:20px}
+#status{font-size:14px;font-weight:700;letter-spacing:.1em}#error{color:#a52819;white-space:pre-wrap}
+dl{display:grid;grid-template-columns:145px 1fr;gap:8px}dt,dd{margin:0}footer{font-size:14px;color:#536b62}
+.table-wrap{overflow:auto;max-height:520px}table{width:100%;border-collapse:collapse;font-size:15px}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid #e5e9e3;white-space:nowrap}th{position:sticky;top:0;background:white}.cut{color:#167349;font-weight:700}select{font:inherit;padding:8px}a{color:#285945}
+dialog{border:1px solid #d9e1d8;border-radius:16px;padding:24px;max-width:680px;width:85%;max-height:80vh;color:#18352c}dialog::backdrop{background:#18352c66}.metric{font-size:24px;font-weight:600}#analysis-notice{color:#805610}
+input,textarea{font:inherit;box-sizing:border-box;padding:8px;border:1px solid #aebdb4;border-radius:6px;max-width:100%}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.form-grid label{display:flex;flex-direction:column;gap:4px}.check{display:block;margin:12px 0}.check input{width:auto}summary{cursor:pointer;font-weight:600}form p[role=status]{white-space:pre-wrap}details{margin:12px 0}
+</style></head><body><main>
+<p class="muted">SHANGHAI HOME RADAR · PRIVATE RESEARCH</p><h1>房源监控</h1>
+<p>验证码由你在专用浏览器中完成。采集只复用这个浏览器，不读取日常 Chrome 的账号数据。</p>
+<section class="card"><div id="status">正在连接</div><p id="reason">读取本机服务状态…</p>
+<dl><dt>上次成功观测</dt><dd id="last">暂无</dd><dt>下次检查</dt><dd id="next">尚未安排</dd><dt>上次房源数量</dt><dd id="count">0</dd><dt>当前来源</dt><dd>徐汇 · 250–300 万 · 单个筛选页</dd><dt>验证检测</dt><dd id="detection">尚未检查</dd></dl>
+<p id="error" role="alert"></p></section>
+<section class="card"><h2>本次分析</h2><p id="analysis-summary">正在读取分析结果…</p>
+<p id="analysis-notice">参考区间的样本来源见逐套依据。成交记录由人工核验，独立验证状态见证据与推荐进度。</p>
+<p class="muted" id="analysis-time"></p><button id="download-report" disabled>下载本次分析</button></section>
+<section class="card"><h2>购房条件</h2><p class="muted">当前来源仅覆盖徐汇 250–300 万的部分挂牌，修改条件不会自动扩大采集范围。留空表示尚未明确，不会自动当作不限。</p>
+<form id="profile-form"><div class="form-grid">
+<label>最低预算（万）<input name="budget_min_wan" type="number" min="0" step="0.1" required></label><label>最高预算（万）<input name="budget_max_wan" type="number" min="0" step="0.1" required></label>
+<label>关注区域（逗号分隔）<input name="districts" required></label><label>最少卧室<input name="bedrooms_min" type="number" min="0" step="1"></label><label>最多卧室<input name="bedrooms_max" type="number" min="0" step="1"></label>
+<label>电梯要求<select name="elevator_required"><option value="">尚未明确</option><option value="true">必须有电梯</option><option value="false">不要求电梯</option></select></label>
+<label>接受楼层（逗号分隔）<input name="allowed_floor_labels" placeholder="例如：中楼层,高楼层"></label><label>通勤目的地<input name="commute_destination"></label><label>最长通勤（分钟）<input name="commute_max_minutes" type="number" min="1" step="1"></label>
+</div><label class="check"><input name="commute_not_required" type="checkbox"> 我不需要按通勤筛选</label><label class="check"><input name="confirmed" type="checkbox"> 我已核对这些购房条件</label><button class="primary" type="submit">保存购房条件</button><p id="profile-message" role="status"></p></form></section>
+<section class="card"><h2>证据与推荐进度</h2><p id="recommendation-summary">正在读取…</p><p id="recommendation-blockers" class="muted"></p>
+<details><summary>接入真实成交记录</summary><p>导入带来源和日期的真实记录。空模板仅说明格式，不能作为成交证据。</p><a href="/transactions/template" class="button" download>下载成交模板</a><form id="transaction-form"><label>成交记录 JSON 文件<input id="transaction-file" type="file" accept="application/json,.json" required></label><button type="submit">导入并检查</button><p id="transaction-message" role="status"></p></form></details>
+<details><summary>高级资料接入 · 就业与供给证据</summary><p>导入带来源、日期和口径说明的真实就业或供给资料。空模板不包含可用于评分的样本。</p><a href="/future-evidence/template" class="button" download>下载因子证据模板</a><form id="future-evidence-form"><label>因子证据 JSON 文件<input id="future-evidence-file" type="file" accept="application/json,.json" required></label><button type="submit">导入因子证据</button><p id="future-evidence-message" role="status"></p></form></details>
+<details><summary>高级资料接入 · 完整市场汇总</summary><p>导入供应方覆盖完整 30 天观测的市场汇总及来源凭据，用于评估流动性。须经人工核验；当前自动观测仍仅覆盖单页的部分挂牌。</p><a href="/market-evidence/template" class="button" download>下载市场汇总模板</a><form id="market-evidence-form"><label>市场汇总 JSON 文件<input id="market-evidence-file" type="file" accept="application/json,.json" required></label><button type="submit">导入市场汇总</button><p id="market-evidence-message" role="status"></p></form></details></section>
+<section class="card"><details><summary>独立复核与盲评</summary><p>每次保存 50 套房源供人工复核。独立评审者应未看过这些房源的模型结果；已看过的可以做练习复核，但不能作为盲评验收。</p>
+<form id="validation-create"><div class="form-grid"><label>复核名称<input name="name" required maxlength="120"></label><label>评审者<input name="reviewer" required maxlength="120"></label></div><label class="check"><input name="independent_review" type="checkbox"> 评审者未看过这些房源的模型结果</label><button type="submit">建立复核批次</button></form>
+<button id="validation-refresh">刷新复核批次</button><div id="validation-runs"></div><p id="validation-message" role="status"></p><div id="validation-workspace"></div></details></section>
+
+<section class="card"><h2>最近观测的房源</h2>
+<p id="freshness" role="status">尚无观测。</p>
+<label for="filter">显示 </label><select id="filter"><option value="all">全部房源</option><option value="cuts">本次降价</option><option value="new">本次首次见到</option><option value="estimated">有参考区间</option><option value="eligible">通过推荐门槛</option><option value="matched">符合购房条件</option><option value="needs_evidence">条件待核实</option></select>
+<div class="table-wrap"><table><thead><tr><th>房源</th><th>面积</th><th>挂牌价</th><th>本次变化</th><th>挂牌参考区间</th><th>分析</th></tr></thead><tbody id="listings"></tbody></table></div>
+<p class="muted">公开挂牌尚未核实。首次见到不等于新挂牌；单页缺失不代表下架。这里不展示未经校准的买入推荐。</p>
+</section>
+<section class="card"><h2>操作</h2>
+<button data-action="initialize">连接专用浏览器</button>
+<button data-action="open">打开来源页</button>
+<a id="remote-browser" class="button" href="http://127.0.0.1:7900/?autoconnect=1&resize=scale" target="_blank" rel="noopener">进入浏览器，手动验证</a>
+<p id="local-browser" hidden>专用 Chrome 在本机独立窗口打开。点击连接专用浏览器可将它调到前面。</p>
+<p class="muted">看到房源列表后回到这里。恢复按钮只检查当前页面，不刷新验证页面。</p>
+<button class="primary" data-action="resume">验证完成并恢复</button>
+<button data-action="pause">暂停并交给我操作</button>
+<button id="notify">开启本页通知</button>
+<p id="remote-history"><a href="http://127.0.0.1:5055/" target="_blank" rel="noopener">打开 changedetection.io 变化历史</a></p></section>
+<footer>恢复后服务自动每 6 小时检查一次，无需保持本页打开。再次验证、连接失败或解析失败即暂停，不自动重试。
+浏览器重启不保证网站仍认可原验证。观测只写入独立研究目录，不修改冻结校准集或生产数据库。
+通知仅在本页开启且浏览器允许通知时显示。</footer></main>
+<dialog id="detail"><button id="close-detail">关闭</button><h2 id="detail-title"></h2><div id="detail-body"></div></dialog>
+<script>
+let prior = '', busy = false;
+let observation = {items:[],changes:[]};
+let analysis = null;
+let recommendations = null;
+let renderedKey = '';
+const money=value=>Number(value).toFixed(1);
+function showDetail(row){
+  document.querySelector('#detail-title').textContent=row.community;
+  const body=document.querySelector('#detail-body');body.replaceChildren();
+  const paragraph=text=>{const p=document.createElement('p');p.textContent=text;body.append(p);};
+  paragraph('观测于 '+new Date(row.observed_at).toLocaleString('zh-CN'));
+  if(row.valuation){
+    const hasTransactions=Number(row.transaction_evidence_count||0)>0||(row.valuation.comparables||[]).some(comp=>comp.observation_type==='transaction');
+    paragraph((hasTransactions?'混合参考区间 ':'挂牌参考区间 ')+money(row.reference_low_wan)+'–'+money(row.reference_high_wan)+' 万。'+(hasTransactions?'成交样本由人工核验；独立验证状态见证据与推荐进度。':'仅供挂牌比较，不代表成交价值。'));
+    const confidence={high:'高',medium:'中',low:'低',insufficient:'资料不足'};
+    paragraph((hasTransactions?'可比样本 ':'可比挂牌 ')+row.valuation.comparable_count+' 条；置信度 '+(confidence[row.valuation.valuation_confidence]||'资料不足')+'。');
+    paragraph(row.rank?'通过研究筛选，第 '+row.rank+' 位。':'尚未通过推荐门槛，不能据此判断值得购买或不值得购买。');
+    paragraph('未来展望与流动性是否足够，按下方证据缺口判断。');
+    const heading=document.createElement('h3');heading.textContent='可比依据';body.append(heading);
+    for(const comp of row.valuation.comparables){
+      const p=document.createElement('p');p.textContent=(comp.community||'同板块样本')+' · '+(comp.source_record_id||comp.observation_id||'')+' · '+(comp.observation_type==='transaction'?'成交参考样本，人工核验，调整后参考 ':'挂牌调整后参考 ')+money(Number(comp.adjusted_value)/10000)+' 万';body.append(p);safeSource(comp.url||comp.source_url,body);
+    }
+  }
+  if(row.baseline_evidence){
+    const b=row.baseline_evidence;
+    paragraph('已接入'+(b.observation_type==='transaction'?'成交':'挂牌')+'基线 · '+b.sample_count+' 条同户型同面积段样本，已排除自身及疑似重复广告。');
+    paragraph(b.observation_type==='transaction'?'成交记录由人工核验，仍需独立校准。':'仅覆盖当前筛选页，基线置信度低。');
+  }
+  if(row.liquidity_evidence){const evidence=row.liquidity_evidence;paragraph('流动性依据 · 供应方完整市场汇总，人工核验。当前自动观测仍是单页部分挂牌。');paragraph('统计窗口 '+(evidence.window_start||'未提供')+' 至 '+(evidence.window_end||'未提供')+'；流动性评分 '+(evidence.score??'资料不足'));safeSource(evidence.source_url,body);}
+  if(row.location_evidence)paragraph('已匹配小区位置 · '+row.location_evidence.formatted_address+'。交通按地图距离评估，不是实际通勤时间。');
+  for(const evidence of row.external_evidence||[]){
+    paragraph(evidence.factor==='supply_scarcity'?'已接入统计年鉴房屋存量变化，作为低置信度供给代理。':'已接入统计年鉴人口密度与人口变化，作为低置信度需求代理。');
+    const url=evidence.metadata?.provenance?.url;
+    if(url&&/^https:\/\//.test(url)){const a=document.createElement('a');a.href=url;a.textContent='查看公开来源';a.target='_blank';a.rel='noopener';body.append(a);}
+  }
+  paragraph('仍需补充');
+  for(const gap of row.missing_evidence||[])paragraph('• '+gap);
+  appendFitAndEvidence(body,row);
+  document.querySelector('#detail').showModal();
+}
+document.querySelector('#close-detail').onclick=()=>document.querySelector('#detail').close();
+document.querySelector('#download-report').onclick=()=>{
+  if(!analysis)return;
+  const url=URL.createObjectURL(new Blob([JSON.stringify(analysis,null,2)],{type:'application/json'}));
+  const link=document.createElement('a');link.href=url;link.download='HouseRadar-'+analysis.input_fingerprint.slice(0,12)+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+function renderListings(){
+const filter=document.querySelector('#filter').value;
+const key=JSON.stringify([observation.items,observation.changes,analysis?.input_fingerprint,recommendations,filter]);
+if(key===renderedKey)return;renderedKey=key;
+const tbody=document.querySelector('#listings');tbody.replaceChildren();
+const changes=new Map(observation.changes.map(row=>[row.listing_id,row]));
+const names={FIRST_SEEN_IN_PILOT:'首次见到',ASKING_PRICE_DECREASED:'降价',ASKING_PRICE_INCREASED:'涨价',UNCHANGED_PRICE:'价格未变'};
+const evaluated=new Map((analysis?.items||[]).map(row=>[row.listing_id,row]));
+for(const item of observation.items){
+  const change=changes.get(item.listing_id);
+  const result=(recommendations?.items||[]).find(row=>row.listing_id===item.listing_id)||evaluated.get(item.listing_id);
+  if(filter==='cuts'&&change?.event!=='ASKING_PRICE_DECREASED')continue;
+  if(filter==='new'&&change?.event!=='FIRST_SEEN_IN_PILOT')continue;
+  if(filter==='estimated'&&!result?.valuation)continue;
+  if(filter==='eligible'&&!result?.personal_rank)continue;
+  if(filter==='matched'&&result?.fit?.status!=='MATCH')continue;
+  if(filter==='needs_evidence'&&result?.fit?.status!=='NEEDS_EVIDENCE')continue;
+  const tr=document.createElement('tr');const title=document.createElement('td');
+  const link=document.createElement('a');link.textContent=item.community||'查看房源';
+  try{const u=new URL(item.url);if(u.protocol==='https:'&&u.hostname==='shanghai.anjuke.com'&&!u.username&&!u.password){link.href=u.href;link.target='_blank';link.rel='noopener noreferrer';}}catch{}
+  title.append(link);tr.append(title);
+  for(const value of [String(item.area_sqm)+' ㎡',String(item.price_wan)+' 万',change?(names[change.event]||'待核对')+(change.delta_wan&&Number(change.delta_wan)!==0?' '+change.delta_wan+' 万':''):'暂无比较基线']){const td=document.createElement('td');td.textContent=value;tr.append(td);}
+  if(change?.event==='ASKING_PRICE_DECREASED')tr.lastChild.className='cut';
+  const range=document.createElement('td');range.textContent=result?.valuation?money(result.reference_low_wan)+'–'+money(result.reference_high_wan)+' 万':'资料不足';tr.append(range);
+  const detail=document.createElement('td');const button=document.createElement('button');button.textContent='查看依据';button.disabled=!result;button.onclick=()=>showDetail(result);detail.append(button);tr.append(detail);
+  tbody.append(tr);
+}
+if(!tbody.children.length){const td=document.createElement('td');td.colSpan=6;td.textContent=observation.items.length?'本次没有符合条件的房源。资料不足不代表市场没有机会。':'尚未采集到房源，完成下方接管流程后显示。';const tr=document.createElement('tr');tr.append(td);tbody.append(tr);}
+}
+document.querySelector('#filter').onchange=renderListings;
+const labels={PAUSED:'已暂停',NEEDS_HUMAN:'需要人工处理',READY:'可以低频采集'};
+async function refresh(){try{const r=await fetch('/status');if(!r.ok)throw Error('接管服务不可用');const s=await r.json();
+document.querySelector('#status').textContent=labels[s.status]||s.status;
+document.querySelector('#reason').textContent=s.reason;
+document.querySelector('#last').textContent=s.last_success_at?new Date(s.last_success_at).toLocaleString('zh-CN'):'暂无';
+document.querySelector('#count').textContent=s.records;
+document.querySelector('#next').textContent=s.next_check_at?new Date(s.next_check_at).toLocaleString('zh-CN'):'暂停中，等待恢复';
+document.querySelector('#remote-browser').hidden=s.browser_mode==='local';
+document.querySelector('#remote-browser').style.display=s.browser_mode==='local'?'none':'';
+document.querySelector('#remote-history').hidden=s.browser_mode==='local';
+document.querySelector('#local-browser').hidden=s.browser_mode!=='local';
+document.querySelector('#detection').textContent=(s.antibot?.detections||[]).map(d=>d.name+(d.requires_human?' · 需要验证':' · 已加载组件')).join('，')||'未识别到已知组件，仍会检查页面内容';
+document.title=(s.status==='NEEDS_HUMAN'?'需要处理 · ':'')+'HouseRadar 房源监控';
+if(s.status==='NEEDS_HUMAN'&&prior!=='NEEDS_HUMAN'&&'Notification' in window&&Notification.permission==='granted')new Notification('HouseRadar 需要人工验证',{body:s.reason});prior=s.status;
+const o=await fetch('/observations');if(!o.ok)throw Error('房源记录暂时不可读');observation=await o.json();
+const a=await fetch('/analysis');analysis=a.ok?await a.json():null;
+// Observation and analysis requests may straddle a new collection; never combine those batches.
+if(analysis&&analysis.observed_at!==observation.observed_at)analysis=null;
+document.querySelector('#analysis-summary').textContent=analysis?analysis.digest:s.analysis_status==='failed'?'本次分析失败，后台会重试，已保留房源记录。':'本次分析尚未就绪。';
+document.querySelector('#analysis-time').textContent=analysis?(analysis.current?'':'历史分析 · ')+ '分析完成于 '+new Date(analysis.generated_at).toLocaleString('zh-CN'):'';
+document.querySelector('#download-report').disabled=!analysis;
+document.querySelector('#freshness').textContent=!observation.items.length?'尚无观测。':observation.stale?'观测已过期，以下仅供查看历史。':!observation.current?'采集已暂停，以下为上次成功记录。':'显示最近成功观测，可筛选本次价格变化。';await refreshRecommendations();renderListings();
+}catch(e){document.querySelector('#error').textContent=e.message;}}
+document.querySelectorAll('[data-action]').forEach(b=>b.onclick=async()=>{if(busy)return;busy=true;
+document.querySelectorAll('button[data-action]').forEach(x=>x.disabled=true);document.querySelector('#error').textContent='';
+try{const r=await fetch('/action/'+b.dataset.action,{method:'POST',headers:{'X-Handoff-Action':'1'}});const s=await r.json();if(!r.ok)throw Error(s.detail||'操作未完成');}
+catch(e){document.querySelector('#error').textContent=e.message;}finally{busy=false;document.querySelectorAll('button[data-action]').forEach(x=>x.disabled=false);await refresh();}});
+document.querySelector('#notify').onclick=async()=>{if('Notification' in window)await Notification.requestPermission();};
+const profileForm=document.querySelector('#profile-form');
+const fields=['budget_min_wan','budget_max_wan','districts','bedrooms_min','bedrooms_max','elevator_required','allowed_floor_labels','commute_destination','commute_max_minutes','commute_not_required','confirmed'];
+const fitLabels={MATCH:'符合已确认条件',EXCLUDED:'不符合条件',NEEDS_EVIDENCE:'条件待核实',PROFILE_INCOMPLETE:'购房条件未完整确认'};
+async function api(path,body,method='POST'){
+  const response=await fetch(path,body===undefined?{}:{method,headers:{'Content-Type':'application/json','X-Handoff-Action':'1'},body:JSON.stringify(body)});
+  const data=await response.json();if(!response.ok)throw Error(typeof data.detail==='string'?data.detail:JSON.stringify(data.detail||data));return data;
+}
+function node(tag,text,parent){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(parent)parent.append(el);return el;}
+function safeSource(url,parent){try{const parsed=new URL(url);if(!['https:','http:'].includes(parsed.protocol)||parsed.username||parsed.password)return;const a=node('a','查看证据来源',parent);a.href=parsed.href;a.target='_blank';a.rel='noopener noreferrer';}catch{}}
+function fillProfile(profile){for(const field of fields){const el=profileForm.elements[field];if(el.type==='checkbox')el.checked=profile[field]===true;else if(Array.isArray(profile[field]))el.value=profile[field].join(',');else el.value=profile[field]===null||profile[field]===undefined?'':String(profile[field]);}}
+profileForm.addEventListener('input',event=>{if(event.target.name!=='confirmed')profileForm.elements.confirmed.checked=false;});
+async function loadProfile(){try{const p=await api('/buyer-profile');fillProfile(p);document.querySelector('#profile-message').textContent=p.confirmed?'已保存并确认。':'尚未确认；当前默认条件不会被当作你的完整需求。';}catch(e){document.querySelector('#profile-message').textContent=e.message;}}
+profileForm.onsubmit=async e=>{e.preventDefault();const button=e.submitter;button.disabled=true;try{const payload={};for(const field of fields){const el=profileForm.elements[field];payload[field]=el.type==='checkbox'?el.checked:el.type==='number'?(el.value===''?null:Number(el.value)):['districts','allowed_floor_labels'].includes(field)?el.value.split(/[,，、]/).map(x=>x.trim()).filter(Boolean):field==='elevator_required'?(el.value===''?null:el.value==='true'):(el.value.trim()||null);}if(payload.budget_min_wan>payload.budget_max_wan)throw Error('最低预算不能高于最高预算。');if(payload.bedrooms_min!==null&&payload.bedrooms_max!==null&&payload.bedrooms_min>payload.bedrooms_max)throw Error('最少卧室不能多于最多卧室。');if(!payload.commute_not_required&&((payload.commute_destination===null)!==(payload.commute_max_minutes===null)))throw Error('请同时填写通勤目的地与最长时间。');await api('/buyer-profile',payload,'PUT');document.querySelector('#profile-message').textContent='条件已保存，匹配结果已更新。';await refreshRecommendations();renderListings();}catch(err){document.querySelector('#profile-message').textContent=err.message;}finally{button.disabled=false;}};
+async function refreshRecommendations(){try{const data=await api('/recommendations');recommendations=data.observed_at===observation.observed_at?data:null;if(!recommendations){document.querySelector('#recommendation-summary').textContent='推荐与观测批次正在同步。';return;}const s=data.summary;document.querySelector('#recommendation-summary').textContent=(data.current?'':'历史观测 · ')+`共 ${s.observed} 套，符合条件 ${s.matched} 套，不符合 ${s.excluded} 套，待补证据 ${s.needs_evidence} 套，条件未完整确认 ${s.profile_incomplete} 套，研究推荐 ${s.recommended} 套。`;const validationText={uncalibrated:'模型尚未完成独立校准。',awaiting_holdout:'首轮复核已通过，仍需独立的新样本验证。',validated_scoped:'仅当前范围研究验证通过，不代表全市场表现。'}[data.readiness?.validation_status]||'验证状态尚未确认。';document.querySelector('#recommendation-blockers').textContent=validationText+(data.readiness?.blockers||[]).map(b=>`${b.label} ${b.count} 套`).join('；');}catch(e){recommendations=null;document.querySelector('#recommendation-summary').textContent='推荐进度暂时不可用。'+e.message;}}
+const evidenceNames={elevator:'电梯',year_built:'建成年份',bedrooms:'卧室数',property_type:'产权类型',floor:'楼层',commute_minutes:'实际通勤',seller_indicated_price_wan:'卖方意向价（万元）'};
+function appendFitAndEvidence(body,row){
+  node('h3','购房条件匹配',body);node('p',fitLabels[row.fit?.status]||'尚未计算个人匹配',body);for(const value of [...(row.fit?.reasons||[]),...(row.fit?.missing||[])])node('p',typeof value==='string'?value:JSON.stringify(value),body);
+  const verified=row.verified_evidence||[];if(verified.length||Object.keys(verified).length){node('h3','人工登记的核实证据',body);for(const evidence of Array.isArray(verified)?verified:Object.values(verified)){node('p',(evidenceNames[evidence.field]||evidence.field||'证据')+' · '+(evidence.field==='elevator'?(evidence.value?'有':'无'):evidence.field==='commute_minutes'?(evidence.value.destination+' '+evidence.value.minutes+' 分钟'):String(evidence.value))+' · 核实人 '+(evidence.verified_by||'未登记'),body);safeSource(evidence.source_url,body);}}
+  const details=node('details',undefined,body);node('summary','补充这套房的核实证据',details);node('p','填写可核查来源和实际核实时间。卖方意向价不等于成交价或已确认可执行价格。',details);const form=node('form',undefined,details);const grid=node('div',undefined,form);grid.className='form-grid';
+  const add=(label,name,type='text')=>{const wrapper=node('label',label,grid);const input=node('input',undefined,wrapper);input.name=name;input.type=type;input.required=true;return input;};
+  const label=node('label','核实项目',grid);const select=node('select',undefined,label);select.name='field';for(const [value,title] of Object.entries(evidenceNames)){const option=node('option',title,select);option.value=value;}
+  const value=add('核实结果','value');const destination=add('通勤目的地','destination');const source=add('证据来源网址','source_url','url');source.placeholder='https://…';add('核实时间','observed_at','datetime-local');add('核实人','verified_by');
+  const adapt=()=>{const field=select.value;value.type=field==='elevator'?'text':['year_built','bedrooms','commute_minutes','seller_indicated_price_wan'].includes(field)?'number':'text';value.value='';value.placeholder=field==='elevator'?'填 有 或 无':'';value.step=field==='seller_indicated_price_wan'?'0.1':'1';value.min='0';destination.parentElement.hidden=field!=='commute_minutes';destination.required=field==='commute_minutes';};select.onchange=adapt;adapt();
+  const submit=node('button','保存核实证据',form);submit.type='submit';const message=node('p','',form);message.setAttribute('role','status');form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;try{let result=value.type==='number'?Number(value.value):value.value.trim();if(select.value==='elevator'){if(!['有','无'].includes(result))throw Error('电梯结果请填写 有 或 无。');result=result==='有';}if(select.value==='commute_minutes')result={destination:destination.value.trim(),minutes:result};await api('/property-evidence',{listing_id:row.listing_id,field:select.value,value:result,source_url:source.value.trim(),observed_at:new Date(form.elements.observed_at.value).toISOString(),verified_by:form.elements.verified_by.value.trim()});message.textContent='证据已保存，已重新检查匹配条件。';await refreshRecommendations();renderListings();}catch(err){message.textContent=err.message;}finally{submit.disabled=false;}};
+}
+document.querySelector('#transaction-form').onsubmit=async e=>{e.preventDefault();e.submitter.disabled=true;try{const file=document.querySelector('#transaction-file').files[0];const result=await api('/transactions/import',JSON.parse(await file.text()));document.querySelector('#transaction-message').textContent=`已导入 ${result.imported} 条，跳过重复 ${result.duplicates} 条；目前共有 ${result.total} 条成交记录。`;await refresh();}catch(err){document.querySelector('#transaction-message').textContent=err.message;}finally{e.submitter.disabled=false;}};
+document.querySelector('#future-evidence-form').onsubmit=async e=>{e.preventDefault();e.submitter.disabled=true;try{const file=document.querySelector('#future-evidence-file').files[0];const result=await api('/future-evidence/import',JSON.parse(await file.text()));document.querySelector('#future-evidence-message').textContent=`已导入 ${result.imported} 条，跳过重复 ${result.duplicates} 条；目前共有 ${result.total} 条因子证据。`;await refresh();}catch(err){document.querySelector('#future-evidence-message').textContent=err.message;}finally{e.submitter.disabled=false;}};
+document.querySelector('#market-evidence-form').onsubmit=async e=>{e.preventDefault();e.submitter.disabled=true;try{const file=document.querySelector('#market-evidence-file').files[0];const result=await api('/market-evidence/import',JSON.parse(await file.text()));document.querySelector('#market-evidence-message').textContent=`已导入 ${result.imported} 条，跳过重复 ${result.duplicates} 条；目前共有 ${result.total} 条市场汇总。`;await refresh();}catch(err){document.querySelector('#market-evidence-message').textContent=err.message;}finally{e.submitter.disabled=false;}};
+const classNames={QUALITY_AT_DISCOUNT:'质优价合理',GOOD_BUT_EXPENSIVE:'品质好但价格高',VALUE_TRAP:'便宜但有明显隐患',LOW_QUALITY:'品质不符合要求',INSUFFICIENT_INFORMATION:'证据不足'};
+const workflowNames={PASS:'不跟进',WATCH:'继续观察',CONTACT:'联系核实',VIEW:'安排看房'};
+const validationMessage=document.querySelector('#validation-message');
+async function listValidation(){try{const data=await api('/validation-runs');const container=document.querySelector('#validation-runs');container.replaceChildren();for(const run of data.items){const b=node('button',run.name+' · '+run.labeled_count+'/'+run.sample_size+' · '+({LABELING:'待复核',FROZEN:'已冻结',REVEALED:'已对照'}[run.status]||run.status),container);b.onclick=()=>openValidation(run.batch_id);}if(!data.items.length)node('p','尚无复核批次。',container);}catch(e){validationMessage.textContent=e.message;}}
+document.querySelector('#validation-refresh').onclick=listValidation;
+document.querySelector('#validation-create').onsubmit=async e=>{e.preventDefault();e.submitter.disabled=true;try{const f=e.currentTarget;const run=await api('/validation-runs',{name:f.elements.name.value.trim(),reviewer:f.elements.reviewer.value.trim(),independent_review:f.elements.independent_review.checked});validationMessage.textContent='复核批次已保存。';await listValidation();renderValidation(run);}catch(err){validationMessage.textContent=err.message;}finally{e.submitter.disabled=false;}};
+async function openValidation(id){try{renderValidation(await api('/validation-runs/'+encodeURIComponent(id)));}catch(e){validationMessage.textContent=e.message;}}
+function renderValidation(run){const panel=document.querySelector('#validation-workspace');panel.replaceChildren();node('h3',run.name,panel);node('p',(run.independent_review?'已声明独立盲评':'练习复核')+' · 已标注 '+run.labeled_count+'/'+run.sample_size,panel);node('p',run.scope_warning||'本批次仅用于当前来源的研究复核，不能直接代表全市场准确率。',panel);
+  if(run.buyer_profile){const p=run.buyer_profile;const snapshot=node('details',undefined,panel);node('summary','本批次冻结的购房条件',snapshot);node('p','预算 '+(p.budget_min_wan??'未明确')+'–'+(p.budget_max_wan??'未明确')+' 万；区域 '+((p.districts||[]).join('、')||'未明确'),snapshot);node('p','卧室 '+(p.bedrooms_min??'未明确')+' 至 '+(p.bedrooms_max??'未明确')+'；电梯 '+(p.elevator_required===true?'必须有':p.elevator_required===false?'不要求':'未明确')+'；接受楼层 '+((p.allowed_floor_labels||[]).join('、')||'未明确'),snapshot);node('p',p.commute_not_required?'不按通勤筛选':'通勤目的地 '+(p.commute_destination||'未明确')+'；最长 '+(p.commute_max_minutes??'未明确')+' 分钟',snapshot);node('p',(p.confirmed?'用户已确认条件':'用户尚未确认完整条件')+(p.revision!=null?' · 条件版本 '+p.revision:''),snapshot);}
+  if(run.status==='LABELING'){const freeze=node('button','完成全部标注并冻结',panel);freeze.disabled=run.labeled_count!==run.sample_size;freeze.onclick=()=>validationAction(run.batch_id,'freeze');}
+  if(run.status==='FROZEN'){node('p','标签已冻结。揭示模型结果后不能继续作为未曝光的盲评。',panel);const reveal=node('button','揭示结果并对照',panel);reveal.onclick=()=>validationAction(run.batch_id,'reveal');}
+  if(run.comparison){node('h4','复核对照',panel);const metrics=run.comparison.metrics||{};const metricNames={precision_at_5:'前五名质优价合理比例',precision_at_10:'前十名质优价合理比例',human_acceptance_at_5:'前五名人工接受比例',human_acceptance_at_10:'前十名人工接受比例',human_view_recall:'愿意看房样本召回率',ranked_count:'进入排序套数',sample_size:'复核样本套数',value_traps_at_5:'前五名隐患房套数',value_traps_at_10:'前十名隐患房套数',workflow_accuracy:'跟进建议一致率',regret_at_5:'前五名后悔率',why_ranked_major_contradiction_rate:'推荐理由重大矛盾率'};const countMetrics=['ranked_count','sample_size','value_traps_at_5','value_traps_at_10'];for(const [key,value] of Object.entries(metrics))if(metricNames[key])node('p',metricNames[key]+' · '+(value===null?'无法计算':countMetrics.includes(key)?String(value):(Number(value)*100).toFixed(0)+'%'),panel);node('p','本次仅作为研究复核，不代表模型已通过正式校准。',panel);for(const limitation of run.comparison.limitations||[])node('p',limitation,panel);}
+  for(const item of run.items||[]){const detail=node('details',undefined,panel);const facts=item.listing||{};node('summary',(facts.community||item.listing_id)+(item.label?' · 已标注':' · 待标注'),detail);node('p',[facts.district,facts.area_sqm?facts.area_sqm+' ㎡':null,facts.price_wan?facts.price_wan+' 万':null,facts.bedrooms!=null?facts.bedrooms+' 卧':null,facts.floor,facts.orientation].filter(Boolean).join(' · '),detail);safeSource(facts.url,detail);
+  const form=node('form',undefined,detail);const grid=node('div',undefined,form);grid.className='form-grid';const addSelect=(label,name,values)=>{const holder=node('label',label,grid);const select=node('select',undefined,holder);select.name=name;select.required=true;const empty=node('option','请选择',select);empty.value='';for(const [key,value] of Object.entries(values)){const option=node('option',value,select);option.value=key;}select.value=item.label?.[name]===undefined?'':String(item.label[name]);return select;};addSelect('人工判断','human_class',classNames);addSelect('下一步','human_workflow',workflowNames);addSelect('是否愿意看房','human_would_visit',{'true':'愿意','false':'不愿意'});const notesLabel=node('label','判断依据',grid);const notes=node('textarea',undefined,notesLabel);notes.name='notes';notes.value=item.label?.notes||'';const submit=node('button','保存这套标注',form);submit.type='submit';if(run.status!=='LABELING')for(const el of form.elements)el.disabled=true;const message=node('p','',form);form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;try{await api('/validation-runs/'+encodeURIComponent(run.batch_id)+'/labels',{listing_id:item.listing_id,human_class:form.elements.human_class.value,human_workflow:form.elements.human_workflow.value,human_would_visit:form.elements.human_would_visit.value==='true',notes:notes.value.trim()});message.textContent='已保存。';await listValidation();const fresh=await api('/validation-runs/'+encodeURIComponent(run.batch_id));if(fresh.labeled_count===fresh.sample_size)renderValidation(fresh);}catch(err){message.textContent=err.message;}finally{submit.disabled=false;}};
+  if(run.status==='REVEALED'&&item.model){node('h4','冻结后模型对照',detail);const d=item.model.decision||{};node('p','模型判断 '+(classNames[d.opportunity_classification]||'未形成分类')+' · '+(workflowNames[d.workflow_state]||'无跟进建议'),detail);for(const reason of d.positive_reasons||[])node('p','支持理由 · '+reason,detail);for(const reason of d.negative_reasons||[])node('p','风险理由 · '+reason,detail);appendReasonReview(detail,run,item);}
+  }
+}
+async function validationAction(id,action){try{renderValidation(await api('/validation-runs/'+encodeURIComponent(id)+'/'+action,{}));await listValidation();}catch(e){validationMessage.textContent=e.message;}}
+function appendReasonReview(parent,run,item){
+  const form=node('form',undefined,parent);node('p','对照人工判断后复核模型理由。原始盲评标签保持冻结。',form);const grid=node('div',undefined,form);grid.className='form-grid';
+  const add=(title,name,options,defaultValue)=>{const holder=node('label',title,grid);const select=node('select',undefined,holder);select.name=name;select.required=true;for(const [key,value] of Object.entries(options)){const option=node('option',value,select);option.value=key;}select.value=item.review?.[name]||defaultValue;return select;};
+  add('理由是否与证据一致','why_ranked_verdict',{'':'请选择',AGREE:'一致',PARTIAL:'部分一致',CONTRADICT:'存在重大矛盾'},'');add('主要原因','root_cause',{UNKNOWN:'尚未确定',DATA_GAP:'资料缺失',BAD_COMPARABLE_SELECTION:'可比样本选择不当',VALUATION_ERROR:'估值有误',LIQUIDITY_ERROR:'流动性判断有误',FUTURE_FACTOR_ERROR:'未来因子判断有误',OBSOLESCENCE_ERROR:'老化风险判断有误',DECISION_RULE_ERROR:'决策规则有误',HUMAN_DISAGREEMENT:'人工判断存在分歧'},'UNKNOWN');
+  const holder=node('label','复核说明',grid);const notes=node('textarea',undefined,holder);notes.name='notes';notes.value=item.review?.notes||'';const submit=node('button','保存理由复核',form);submit.type='submit';const message=node('p','',form);message.setAttribute('role','status');form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;try{await api('/validation-runs/'+encodeURIComponent(run.batch_id)+'/reviews',{listing_id:item.listing_id,why_ranked_verdict:form.elements.why_ranked_verdict.value,root_cause:form.elements.root_cause.value,notes:notes.value.trim()});message.textContent='理由复核已保存。完成全部房源后，重新打开本批次查看最新验收结果。';await listValidation();await refreshRecommendations();}catch(err){message.textContent=err.message;}finally{submit.disabled=false;}};
+}
+loadProfile();listValidation();
+
+refresh();setInterval(refresh,10000);
+</script></body></html>

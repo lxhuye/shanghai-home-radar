@@ -1,0 +1,27 @@
+schema_version: 1
+protocol_version: p5.6
+configuration_version: validation-2026-09-02
+
+dataset:
+  target_sample_size: 50
+  minimum_sample_size: 45
+  maximum_sample_size: 55
+  minimum_price_rmb: 2300000
+  maximum_price_rmb: 3300000
+  required_geography_buckets:
+    - OUTER_XUHUI
+    - NORTHERN_MINHANG
+    - PUTUO
+    - YANGPU
+    - MATURE_PUDONG
+  minimum_distinct_archetypes: 8
+  maximum_single_archetype_share: 0.35
+
+gate:
+  precision_at_5: 0.80
+  precision_at_10: 0.70
+  human_acceptance_at_10: 0.70
+  maximum_value_traps_at_10: 1
+  human_view_recall: 0.80
+  maximum_why_ranked_major_contradiction_rate: 0.15
+  maximum_regret_at_5: 1

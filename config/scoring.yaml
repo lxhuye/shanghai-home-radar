@@ -1,0 +1,65 @@
+version: "0.1.0"
+score_scale:
+  minimum: 0
+  maximum: 100
+
+# Active V0 Value Score contract consumed by the scoring engine.
+weights:
+  fair_value_discount: 35
+  liquidity: 20
+  location: 15
+  property_quality: 15
+  seller_motivation: 10
+  optionality: 5
+
+thresholds:
+  watch: 65
+  contact: 75
+  view: 85
+  attack: 90
+
+future_score:
+  weights:
+    employment_accessibility: 20
+    rail_transport: 15
+    land_supply_scarcity: 15
+    buyer_pool_liquidity: 15
+    community_competitiveness: 10
+    urban_renewal_potential: 10
+    rental_demand: 5
+    public_services: 5
+    planning_realization: 5
+
+buy_score:
+  enabled: false
+  calibration_status: required_before_p5
+  required_components:
+    - value_score
+    - future_score
+    - liquidity_score
+    - obsolescence_risk
+
+decision_thresholds:
+  PASS:
+    minimum: 0
+    maximum_exclusive: 65
+  WATCH:
+    minimum: 65
+    maximum_exclusive: 75
+  CONTACT:
+    minimum: 75
+    maximum_exclusive: 85
+  VIEW:
+    minimum: 85
+    maximum_exclusive: 90
+  ATTACK:
+    minimum: 90
+    maximum_inclusive: 100
+
+quality_value_quadrants:
+  high_score_minimum: 75
+  labels:
+    high_future_low_value: GOOD_BUT_EXPENSIVE
+    high_future_high_value: QUALITY_AT_DISCOUNT
+    low_future_high_value: VALUE_TRAP
+    low_future_low_value: PASS

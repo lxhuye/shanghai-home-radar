@@ -1,0 +1,47 @@
+schema_version: 1
+decision_model_version: p55-decision-v1
+configuration_version: decision-2026-09-02
+
+classification:
+  high_value_score: 75
+  high_future_score: 75
+  minimum_future_coverage: 0.65
+  minimum_obsolescence_coverage: 0.55
+
+eligibility:
+  minimum_confidence: low
+  maximum_obsolescence_risk: 65
+  hard_risk_warnings:
+    - HIGH_OBSOLESCENCE_RISK
+    - SUPPLY_SHOCK_RISK
+
+workflow:
+  attack_enabled: false
+  view_minimum_value_score: 80
+  view_minimum_future_score: 80
+  view_minimum_liquidity_score: 75
+  view_maximum_obsolescence_risk: 45
+  contact_minimum_liquidity_score: 55
+
+ranking:
+  classification_priority:
+    QUALITY_AT_DISCOUNT: 2
+    GOOD_BUT_EXPENSIVE: 1
+  confidence_priority:
+    high: 4
+    medium: 3
+    low: 2
+    insufficient: 1
+
+explanations:
+  high_liquidity_score: 75
+  positive_structural_alpha: 5
+  maximum_positive_reasons: 4
+  maximum_negative_reasons: 4
+
+validation:
+  target_sample_size: 50
+  accepted_labels:
+    - WORTH_VIEWING
+    - WAIT
+  strict_positive_label: WORTH_VIEWING

@@ -1,0 +1,205 @@
+valuation_model_version: p4-fair-value-v1
+scoring_model_version: p4-value-score-v1
+configuration_version: valuation-2026-09-02
+
+comparables:
+  windows_days: [90, 180, 365]
+  minimum_comparables: 3
+  target_comparables: 8
+  maximum_comparables: 20
+  tier_1_area_tolerance: 0.10
+  tier_2_area_tolerance: 0.20
+  tier_3_area_tolerance: 0.30
+  tier_1_building_age_years: 5
+  tier_2_building_age_years: 10
+  transaction_weight_multiplier: 1.25
+  baseline_weight: 0.80
+  strong_transaction_count: 3
+  outlier_minimum_samples: 5
+  outlier_mad_threshold: 3.5
+  unknown_similarity: 0.50
+  adjacent_layout_similarity: 0.65
+  cross_community_similarity: 0.50
+  building_age_similarity_horizon_years: 30
+  tier_multipliers:
+    tier_1: 1.00
+    tier_2: 0.78
+    tier_3: 0.55
+    tier_4: 0.40
+  adjacent_layouts:
+    1BR: [2BR]
+    2BR: [1BR, "3BR+"]
+    "3BR+": [2BR]
+  weights:
+    geography: 0.18
+    community: 0.15
+    area: 0.14
+    layout: 0.11
+    building_age: 0.08
+    floor: 0.06
+    elevator: 0.05
+    orientation: 0.04
+    freshness: 0.11
+    source_confidence: 0.08
+
+adjustments:
+  maximum_absolute_total_rate: 0.18
+  floor_elevator_rates:
+    walk_up:
+      ground: -0.045
+      low: -0.010
+      middle: 0.020
+      high: -0.030
+      top: -0.085
+    elevator:
+      ground: -0.035
+      low: -0.010
+      middle: 0.010
+      high: 0.015
+      top: -0.035
+    high_rise:
+      ground: -0.040
+      low: -0.015
+      middle: 0.010
+      high: 0.020
+      top: -0.025
+  orientation_rates:
+    south: 0.015
+    south_north: 0.025
+    east: 0.000
+    west: -0.010
+    north: -0.025
+    mixed: -0.005
+    unknown: 0.000
+  building_age_rate_per_year: 0.0025
+  building_age_maximum_rate: 0.075
+  metro_bucket_rates:
+    within_500m: 0.020
+    500_800m: 0.010
+    800_1200m: 0.000
+    over_1200m: -0.015
+    unknown: 0.000
+  metro_distance_thresholds_m: [500, 800, 1200]
+  metro_minimum_intra_community_difference_m: 250
+  layout_quality_rates:
+    mainstream: 0.010
+    acceptable: 0.000
+    non_mainstream: -0.025
+    known_disadvantage: -0.055
+    unknown: 0.000
+  road_noise_rates:
+    quiet: 0.010
+    normal: 0.000
+    exposed: -0.035
+    severe: -0.070
+    unknown: 0.000
+  base_uncertainty_rate: 0.035
+  missing_attribute_uncertainty_rate: 0.008
+  maximum_interval_rate: 0.22
+
+confidence:
+  target_comparable_count: 8
+  target_effective_count: 6
+  target_source_count: 3
+  maximum_dispersion_rate: 0.20
+  maximum_missing_attributes: 8
+  weights:
+    comparable_count: 0.16
+    effective_weight: 0.13
+    tier_quality: 0.12
+    baseline_confidence: 0.12
+    freshness: 0.10
+    source_diversity: 0.09
+    dispersion: 0.10
+    target_completeness: 0.08
+    transaction_support: 0.10
+  thresholds:
+    high: 0.80
+    medium: 0.60
+    low: 0.35
+
+value_score:
+  component_caps:
+    price_edge: 35
+    liquidity: 25
+    employment_transit: 20
+    property_quality: 15
+    seller_signal: 5
+  price_edge_curve:
+    - {x: -0.10, y: 0}
+    - {x: 0.00, y: 5}
+    - {x: 0.03, y: 12}
+    - {x: 0.05, y: 18}
+    - {x: 0.08, y: 27}
+    - {x: 0.10, y: 32}
+    - {x: 0.20, y: 35}
+  decision_thresholds:
+    watch: 65
+    contact: 75
+    view: 85
+    attack: 90
+  accessibility_weights:
+    metro: 0.50
+    employment: 0.30
+    mature_amenities: 0.20
+  quality_weights:
+    floor_elevator: 0.25
+    orientation: 0.15
+    building_age: 0.15
+    layout_quality: 0.20
+    hard_defects: 0.25
+  metro_scores:
+    within_500m: 100
+    500_800m: 85
+    800_1200m: 65
+    over_1200m: 35
+  metro_distance_thresholds_m: [500, 800, 1200]
+  floor_elevator_scores:
+    walk_up: {ground: 35, low: 75, middle: 85, high: 45, top: 20}
+    elevator: {ground: 45, low: 75, middle: 90, high: 95, top: 65}
+    high_rise: {ground: 40, low: 70, middle: 90, high: 95, top: 70}
+  orientation_scores:
+    south: 90
+    south_north: 100
+    east: 75
+    west: 60
+    north: 45
+    mixed: 65
+  layout_quality_scores:
+    mainstream: 95
+    acceptable: 75
+    non_mainstream: 45
+    known_disadvantage: 20
+  building_age_points_per_year: 2
+  building_age_minimum_score: 30
+  hard_defect_penalty: 30
+  liquidity_modifiers:
+    mainstream_total_price: 5
+    mainstream_area: 4
+    mainstream_layout: 4
+    extreme_floor: -15
+    unusual_property: -20
+  unusual_property_types: [commercial, loft, serviced_apartment, "商住", "酒店式公寓"]
+  mainstream_total_price_min: 2500000
+  mainstream_total_price_max: 8000000
+  mainstream_area_min: 45
+  mainstream_area_max: 100
+  seller_signal:
+    cut_count_target: 3
+    cumulative_cut_target: 0.10
+    long_dom_days: 180
+    recent_cut_days: 30
+    cut_count_weight: 0.25
+    cumulative_cut_weight: 0.30
+    dom_weight: 0.20
+    recency_weight: 0.15
+    relisting_weight: 0.10
+
+warnings:
+  large_discount_rate: 0.08
+  low_liquidity_score: 40
+  insufficient_comparable_count: 3
+  low_confidence_score: 0.35
+  trap_score_cap: 89
+  insufficient_confidence_score_cap: 84
+  abnormal_property_types: [commercial, loft, serviced_apartment, "商住", "酒店式公寓"]

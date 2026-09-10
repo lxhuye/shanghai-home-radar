@@ -1,0 +1,106 @@
+# Standalone upstream monitor. Does not join HouseRadar's database/worker network.
+# The monitor has no Internet egress. Only the dedicated browser visits source pages.
+name: house-radar-monitor
+
+services:
+  monitor:
+    image: dgtlmoon/changedetection.io:0.60.3@sha256:ecacd9fd0c664a786b77daadbbbf51373519b29178a32df3ddbc5c594bc067ed
+    command:
+      - python
+      - -c
+      - |
+        import os
+        from changedetectionio import __version__
+        from changedetectionio.store import ChangeDetectionStore
+        ChangeDetectionStore(
+            datastore_path="/datastore",
+            include_default_watches=False,
+            version_tag=__version__,
+        )
+        os.execvp("python", ["python", "changedetection.py", "-d", "/datastore"])
+    environment:
+      TZ: Asia/Shanghai
+      LC_ALL: C.UTF-8
+      LOGGER_LEVEL: INFO
+      DISABLE_VERSION_CHECK: "true"
+      LLM_FEATURES_DISABLED: "true"
+      FETCH_WORKERS: "1"
+      MINIMUM_SECONDS_RECHECK_TIME: "21600"
+      PAGE_WATCH_LIMIT: "10"
+      ALLOW_IANA_RESTRICTED_ADDRESSES: "true"
+    networks: [control]
+    volumes:
+      - monitor_data:/datastore
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/', timeout=3)"
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 30s
+    restart: unless-stopped
+
+  panel:
+    image: nginx@sha256:b34848eff6db786b6b1282d3a9c3fd0b5563dfb6d261df4923378b419e0d24f0
+    ports: ["127.0.0.1:5055:80", "127.0.0.1:7900:7900"]
+    volumes:
+      - ./infra/docker/monitor-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [control, access]
+    depends_on: [monitor]
+    restart: unless-stopped
+
+  browser:
+    build:
+      context: .
+      dockerfile: infra/docker/handoff-browser.Dockerfile
+    shm_size: 2gb
+    environment:
+      SE_NODE_MAX_SESSIONS: "1"
+      SE_NODE_SESSION_TIMEOUT: "86400"
+      SE_VNC_NO_PASSWORD: "true"
+      SE_ENABLE_TRACING: "false"
+      SE_LOG_LEVEL: WARNING
+      SE_SCREEN_WIDTH: "1440"
+      SE_SCREEN_HEIGHT: "1000"
+    volumes:
+      - browser_profile:/home/seluser/homeradar-profile
+    networks: [control, access]
+    restart: unless-stopped
+
+  handoff:
+    build:
+      context: .
+      dockerfile: infra/docker/handoff.Dockerfile
+    ports: ["127.0.0.1:5057:8000"]
+    environment:
+      SHR_WEBDRIVER_URL: http://browser:4444
+      SHR_HANDOFF_STATE_DIR: /state
+      SHR_HANDOFF_EXPORT_DIR: /exports
+    volumes:
+      - handoff_state:/state
+      - ./data/exports/browser_handoff:/exports
+    networks: [control, access]
+    depends_on: [browser]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/status', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+    restart: unless-stopped
+
+networks:
+  control:
+    internal: true
+  access: {}
+
+volumes:
+  monitor_data:
+  browser_profile:
+  handoff_state:

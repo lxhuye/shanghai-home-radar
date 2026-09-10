@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "source_id": "sample_json",
+  "scope": {
+    "city": "shanghai",
+    "filters": {}
+  },
+  "completeness": "complete",
+  "coverage": {
+    "page_count": 1,
+    "pages_fetched": 1,
+    "reported_total": 3,
+    "items_returned": 3
+  },
+  "metadata": {
+    "dataset": "local_demo"
+  },
+  "items": [
+    {
+      "listing_id": "demo-xh-001",
+      "url": "https://example.invalid/shanghai/demo-xh-001",
+      "district": "Xuhui",
+      "submarket": "Huajing",
+      "community": "Huajing Garden",
+      "longitude": 121.4491,
+      "latitude": 31.1428,
+      "price_wan": 305,
+      "area_sqm": 67.4,
+      "bedrooms": 2,
+      "living_rooms": 1,
+      "floor": "middle",
+      "total_floors": 6,
+      "orientation": "south",
+      "year_built": 2003,
+      "elevator": false,
+      "building_type": "slab",
+      "status": "active"
+    },
+    {
+      "listing_id": "demo-mh-001",
+      "url": "https://example.invalid/shanghai/demo-mh-001",
+      "district": "Minhang",
+      "submarket": "Gumei",
+      "community": "Gumei New Village",
+      "longitude": 121.3978,
+      "latitude": 31.1514,
+      "price_wan": 292,
+      "area_sqm": 64.8,
+      "bedrooms": 2,
+      "living_rooms": 1,
+      "floor": "high",
+      "total_floors": 6,
+      "orientation": "south-east",
+      "year_built": 1998,
+      "elevator": false,
+      "building_type": "slab",
+      "status": "active"
+    },
+    {
+      "listing_id": "demo-pt-001",
+      "url": "https://example.invalid/shanghai/demo-pt-001",
+      "district": "Putuo",
+      "submarket": "Taopu",
+      "community": "Taopu Community",
+      "longitude": 121.3619,
+      "latitude": 31.2822,
+      "price_wan": 318,
+      "area_sqm": 71.2,
+      "bedrooms": 2,
+      "living_rooms": 1,
+      "floor": "middle",
+      "total_floors": 14,
+      "orientation": "south",
+      "year_built": 2008,
+      "elevator": true,
+      "building_type": "tower",
+      "status": "active"
+    }
+  ]
+}

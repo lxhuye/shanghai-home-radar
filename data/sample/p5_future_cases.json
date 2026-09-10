@@ -1,0 +1,150 @@
+{
+  "data_mode": "demo",
+  "cases": [
+    {
+      "id": "A",
+      "name": "Quality at Discount",
+      "property": {
+        "area_sqm": 82,
+        "fair_value": 4300000,
+        "value_score": 86,
+        "year_built": 1998,
+        "elevator": true,
+        "parking_quality": "average",
+        "property_management_quality": "good",
+        "maintenance_quality": "good",
+        "layout_mainstreamness": "excellent",
+        "bedrooms": 2
+      },
+      "factors": {
+        "employment_accessibility": [82, 88],
+        "transport_accessibility": [80, 84],
+        "supply_scarcity": [78, 85],
+        "buyer_pool_depth": [80, 84],
+        "community_competitiveness": [76, 80],
+        "urban_renewal": [55, 62],
+        "rental_demand": [70, 72],
+        "public_services": [76, 78],
+        "planning_realization": [65, 75],
+        "market_cycle": [52, 55]
+      },
+      "hierarchy": {"district_alpha": 15, "submarket_alpha": 22, "community_alpha": 18, "property_alpha": 12}
+    },
+    {
+      "id": "B",
+      "name": "Value Trap",
+      "property": {
+        "area_sqm": 54,
+        "fair_value": 2200000,
+        "value_score": 82,
+        "year_built": 1983,
+        "elevator": false,
+        "parking_quality": "very_poor",
+        "property_management_quality": "poor",
+        "maintenance_quality": "poor",
+        "layout_mainstreamness": "poor",
+        "bedrooms": 2
+      },
+      "factors": {
+        "employment_accessibility": [38, 35],
+        "transport_accessibility": [36, 35],
+        "supply_scarcity": [32, 20],
+        "buyer_pool_depth": [36, 24],
+        "community_competitiveness": [32, 24],
+        "urban_renewal": [15, 18],
+        "rental_demand": [30, 25],
+        "public_services": [42, 40],
+        "planning_realization": [25, 28],
+        "market_cycle": [42, 35]
+      },
+      "hierarchy": {"district_alpha": -12, "submarket_alpha": -28, "community_alpha": -35, "property_alpha": -42}
+    },
+    {
+      "id": "C",
+      "name": "Good but Expensive",
+      "property": {
+        "area_sqm": 96,
+        "fair_value": 6900000,
+        "value_score": 48,
+        "year_built": 2015,
+        "elevator": true,
+        "parking_quality": "good",
+        "property_management_quality": "excellent",
+        "maintenance_quality": "excellent",
+        "layout_mainstreamness": "good",
+        "bedrooms": 3
+      },
+      "factors": {
+        "employment_accessibility": [88, 94],
+        "transport_accessibility": [86, 92],
+        "supply_scarcity": [74, 80],
+        "buyer_pool_depth": [78, 84],
+        "community_competitiveness": [88, 90],
+        "urban_renewal": [65, 72],
+        "rental_demand": [78, 80],
+        "public_services": [88, 90],
+        "planning_realization": [72, 80],
+        "market_cycle": [55, 58]
+      },
+      "hierarchy": {"district_alpha": 18, "submarket_alpha": 25, "community_alpha": 30, "property_alpha": 28}
+    },
+    {
+      "id": "D",
+      "name": "Planning Speculation",
+      "property": {
+        "area_sqm": 68,
+        "fair_value": 3100000,
+        "value_score": 60,
+        "year_built": 2002,
+        "elevator": true,
+        "parking_quality": "average",
+        "property_management_quality": "average",
+        "maintenance_quality": "average",
+        "layout_mainstreamness": "good",
+        "bedrooms": 2
+      },
+      "factors": {
+        "employment_accessibility": [38, 46],
+        "transport_accessibility": [24, 70],
+        "supply_scarcity": [42, 38],
+        "buyer_pool_depth": [42, 44],
+        "community_competitiveness": [40, 43],
+        "urban_renewal": [20, 38],
+        "rental_demand": [38, 40],
+        "public_services": [40, 44],
+        "planning_realization": [10, 20],
+        "market_cycle": [45, 44]
+      },
+      "hierarchy": {"district_alpha": -5, "submarket_alpha": -8, "community_alpha": -12, "property_alpha": -5}
+    },
+    {
+      "id": "E",
+      "name": "Aging Core Location",
+      "property": {
+        "area_sqm": 72,
+        "fair_value": 5600000,
+        "value_score": 68,
+        "year_built": 1970,
+        "elevator": false,
+        "parking_quality": "poor",
+        "property_management_quality": "average",
+        "maintenance_quality": "poor",
+        "layout_mainstreamness": "excellent",
+        "bedrooms": 2
+      },
+      "factors": {
+        "employment_accessibility": [92, 95],
+        "transport_accessibility": [90, 92],
+        "supply_scarcity": [72, 76],
+        "buyer_pool_depth": [90, 88],
+        "community_competitiveness": [62, 56],
+        "urban_renewal": [45, 58],
+        "rental_demand": [78, 76],
+        "public_services": [90, 92],
+        "planning_realization": [70, 76],
+        "market_cycle": [54, 55]
+      },
+      "hierarchy": {"district_alpha": 25, "submarket_alpha": 30, "community_alpha": 8, "property_alpha": -22}
+    }
+  ]
+}

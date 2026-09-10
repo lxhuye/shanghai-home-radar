@@ -1,0 +1,63 @@
+# DEMO-ONLY synthetic evidence for engineering tests of the P5 → P5.5 path.
+# Every record is flagged synthetic; the importer rejects this file in sample/live mode.
+# Never point Set A (sample) at this file.
+
+data_mode: demo
+
+employment_centers:
+  - name: demo-centre
+    category: synthetic
+    coordinates: {lon: 121.45, lat: 31.20}
+    current_employment_weight: 1.0
+    future_employment_weight: 1.0
+    effective_from: 2020-01-01T00:00:00+08:00
+    source_timestamp: 2020-01-01T00:00:00+08:00
+    source: demo-synthetic
+    source_record_id: centre-1
+    confidence: 0.5
+    provenance: {synthetic: true, note: engineering fixture}
+
+future_projects:
+  - name: demo-station-current
+    project_type: transport
+    status: current
+    coordinates: {lon: 121.44, lat: 31.19}
+    effective_from: 2020-01-01T00:00:00+08:00
+    source_date: 2020-01-01T00:00:00+08:00
+    source: demo-synthetic
+    source_record_id: station-1
+    confidence: 0.5
+    provenance: {synthetic: true, note: engineering fixture}
+  - name: demo-line-under-construction
+    project_type: transport
+    status: under_construction
+    coordinates: {lon: 121.46, lat: 31.21}
+    expected_completion: 2028-12-31
+    effective_from: 2022-01-01T00:00:00+08:00
+    source_date: 2022-01-01T00:00:00+08:00
+    source: demo-synthetic
+    source_record_id: line-1
+    confidence: 0.5
+    provenance: {synthetic: true, note: engineering fixture}
+
+factor_observations:
+  - factor: supply_scarcity
+    scope_type: shanghai
+    current_score: 55
+    future_score: 58
+    observed_at: 2025-12-31T00:00:00+08:00
+    source: demo-synthetic
+    source_record_id: supply-sh-2025
+    confidence: 0.5
+    explanation: synthetic engineering fixture
+    provenance: {synthetic: true}
+  - factor: buyer_pool_depth
+    scope_type: shanghai
+    current_score: 60
+    future_score: 57
+    observed_at: 2025-12-31T00:00:00+08:00
+    source: demo-synthetic
+    source_record_id: buyer-sh-2025
+    confidence: 0.5
+    explanation: synthetic engineering fixture
+    provenance: {synthetic: true}

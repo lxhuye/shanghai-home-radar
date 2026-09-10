@@ -1,0 +1,148 @@
+schema_version: 2
+future_model_version: p5-future-v1
+scenario_model_version: p5-scenario-v1
+configuration_version: future-2026-09-02
+
+planning_realization_weights:
+  current: 1.00
+  under_construction: 0.70
+  approved: 0.40
+  planned: 0.15
+  conceptual: 0.00
+
+employment_accessibility:
+  distance_score_points:
+    - {distance_km: 0, score: 100}
+    - {distance_km: 3, score: 92}
+    - {distance_km: 8, score: 72}
+    - {distance_km: 15, score: 42}
+    - {distance_km: 30, score: 0}
+  minimum_total_weight: 0.01
+
+transport_accessibility:
+  distance_score_points:
+    - {distance_km: 0, score: 100}
+    - {distance_km: 0.5, score: 95}
+    - {distance_km: 0.8, score: 82}
+    - {distance_km: 1.2, score: 62}
+    - {distance_km: 2.5, score: 20}
+    - {distance_km: 5, score: 0}
+  maximum_planning_uplift: 25
+
+future_score:
+  weights:
+    employment_accessibility: 20
+    transport_accessibility: 15
+    supply_scarcity: 15
+    buyer_pool_depth: 15
+    community_competitiveness: 10
+    urban_renewal: 10
+    rental_demand: 5
+    public_services: 5
+    planning_realization: 5
+  minimum_coverage: 0.65
+
+obsolescence_risk:
+  weights:
+    building_aging: 18
+    elevator_disadvantage: 12
+    parking_deficiency: 8
+    layout_obsolescence: 10
+    property_management_weakness: 8
+    community_deterioration: 8
+    competing_supply: 12
+    buyer_pool_shrinkage: 10
+    total_price_mismatch: 6
+    product_replacement: 8
+  minimum_coverage: 0.55
+  walk_up_risk: 82
+  elevator_unknown_risk: 50
+  building_age_risk_per_year: 1.25
+  building_age_grace_years: 10
+  mainstream_area_min: 45
+  mainstream_area_max: 120
+  mainstream_total_price_min: 1500000
+  mainstream_total_price_max: 8000000
+
+structural_alpha:
+  component_weights:
+    district_alpha: 8
+    submarket_alpha: 12
+    community_alpha: 12
+    property_alpha: 8
+    infrastructure_delta: 10
+    employment_delta: 15
+    supply_scarcity: 10
+    buyer_pool_delta: 10
+    urban_renewal: 5
+    building_aging: -4
+    product_obsolescence: -4
+    supply_shock: -5
+    market_cycle: 3
+  maximum_absolute_index: 100
+
+scenario_engine:
+  probabilities:
+    bear: 0.20
+    base: 0.55
+    bull: 0.25
+  market_cagr_ranges:
+    1:
+      bear: [-0.10, -0.04]
+      base: [-0.02, 0.035]
+      bull: [0.04, 0.10]
+    3:
+      bear: [-0.07, -0.025]
+      base: [-0.005, 0.04]
+      bull: [0.035, 0.085]
+    5:
+      bear: [-0.05, -0.015]
+      base: [0.005, 0.045]
+      bull: [0.03, 0.075]
+  structural_alpha_maximum_annual_adjustment: 0.04
+  scenario_alpha_sensitivity:
+    bear: 0.70
+    base: 1.00
+    bull: 1.15
+  confidence_range_widening:
+    high: 0.00
+    medium: 0.01
+    low: 0.025
+    insufficient: 0.05
+
+confidence:
+  weights:
+    data_coverage: 0.20
+    data_freshness: 0.10
+    source_authority: 0.10
+    planning_certainty: 0.10
+    employment_data_quality: 0.15
+    supply_data_quality: 0.10
+    rental_data_quality: 0.05
+    transaction_calibration: 0.15
+    historical_continuity: 0.05
+  thresholds:
+    high: 0.78
+    medium: 0.58
+    low: 0.30
+  freshness_half_life_days: 365
+  non_live_maximum: low
+  uncalibrated_maximum: low
+
+calibration:
+  partial_minimum_verified_cases: 30
+  calibrated_minimum_verified_cases: 200
+
+warnings:
+  high_obsolescence_risk: 65
+  supply_shock_score: 65
+  planning_dependency_delta: 12
+  employment_access_weakness: 40
+  aging_product_score: 65
+  liquidity_decay_delta: -12
+  low_rental_support: 40
+  low_forecast_confidence: 0.58
+
+quality_value_quadrants:
+  high_value_score: 75
+  high_future_score: 75

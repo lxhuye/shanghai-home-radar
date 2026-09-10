@@ -1,0 +1,71 @@
+{
+  "data_mode": "demo",
+  "investment_recommendation": false,
+  "cases": [
+    {
+      "id": "A",
+      "name": "normal_liquid_2br",
+      "district": "普陀",
+      "submarket": "真如",
+      "community": "P4演示花园",
+      "area_sqm": 60,
+      "bedrooms": 2,
+      "floor": "middle",
+      "elevator": true,
+      "metro_distance_m": 450,
+      "ask_discount_to_adjusted_baseline": 0.08,
+      "expected": ["high_value_score", "no_value_trap"]
+    },
+    {
+      "id": "B",
+      "name": "cheap_top_floor_walk_up",
+      "district": "普陀",
+      "submarket": "真如",
+      "community": "P4演示花园",
+      "area_sqm": 58,
+      "bedrooms": 2,
+      "floor": "top",
+      "elevator": false,
+      "year_built": 1985,
+      "liquidity_score": 20,
+      "expected": ["VALUE_TRAP_RISK", "not_attack"]
+    },
+    {
+      "id": "C",
+      "name": "good_but_expensive",
+      "district": "徐汇",
+      "submarket": "徐家汇",
+      "community": "P4品质花园",
+      "area_sqm": 72,
+      "bedrooms": 2,
+      "floor": "middle",
+      "elevator": true,
+      "orientation": "south_north",
+      "ask_discount_to_adjusted_baseline": -0.10,
+      "expected": ["strong_property_quality", "pass_or_watch"]
+    },
+    {
+      "id": "D",
+      "name": "insufficient_community_data",
+      "district": "普陀",
+      "submarket": "真如",
+      "community": "P4稀疏样本社区",
+      "area_sqm": 60,
+      "bedrooms": 2,
+      "expected": ["hierarchical_fallback", "lower_confidence"]
+    },
+    {
+      "id": "E",
+      "name": "same_unit_multiple_price_cuts",
+      "district": "普陀",
+      "submarket": "真如",
+      "community": "P4演示花园",
+      "area_sqm": 60,
+      "bedrooms": 2,
+      "original_ask": 3000000,
+      "current_ask": 2700000,
+      "price_cut_count": 3,
+      "expected": ["stable_fair_value", "higher_value_score"]
+    }
+  ]
+}

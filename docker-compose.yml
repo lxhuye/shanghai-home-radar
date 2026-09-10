@@ -1,0 +1,348 @@
+name: shanghai-home-radar
+
+x-backend-environment: &backend-environment
+  SHR_ENVIRONMENT: ${SHR_ENVIRONMENT:-development}
+  SHR_LOG_LEVEL: ${SHR_LOG_LEVEL:-INFO}
+  SHR_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-radar}:${POSTGRES_PASSWORD:-radar}@db:5432/${POSTGRES_DB:-shanghai_home_radar}
+  SHR_REDIS_URL: redis://redis:6379/0
+  SHR_COLLECTOR_QUEUE: ${SHR_COLLECTOR_QUEUE:-collector}
+  SHR_MARKET_QUEUE: ${SHR_MARKET_QUEUE:-market}
+  SHR_VALUATION_QUEUE: ${SHR_VALUATION_QUEUE:-valuation}
+  SHR_FUTURE_QUEUE: ${SHR_FUTURE_QUEUE:-future}
+  SHR_DECISION_QUEUE: ${SHR_DECISION_QUEUE:-decision}
+  SHR_MARKET_DATA_MODE: ${SHR_MARKET_DATA_MODE:-sample}
+  SHR_MARKET_BASELINE_CONFIG_PATH: ${SHR_MARKET_BASELINE_CONFIG_PATH:-config/market_baseline.yaml}
+  SHR_VALUATION_CONFIG_PATH: ${SHR_VALUATION_CONFIG_PATH:-config/valuation.yaml}
+  SHR_FORECASTING_CONFIG_PATH: ${SHR_FORECASTING_CONFIG_PATH:-config/forecasting.yaml}
+  SHR_DECISION_CONFIG_PATH: ${SHR_DECISION_CONFIG_PATH:-config/decision.yaml}
+  SHR_VALIDATION_CONFIG_PATH: ${SHR_VALIDATION_CONFIG_PATH:-config/validation.yaml}
+  SHR_SOURCE_COMMIT: ${SHR_SOURCE_COMMIT:-unknown}
+  SHR_SOURCE_TREE_HASH: ${SHR_SOURCE_TREE_HASH:-unknown}
+  SHR_VALIDATION_REPORT_DIRECTORY: ${SHR_VALIDATION_REPORT_DIRECTORY:-data/exports/validation}
+  SHR_DAILY_REPORT_DIRECTORY: ${SHR_DAILY_REPORT_DIRECTORY:-data/exports/daily}
+  SHR_DAILY_RUN_LOCK_TTL_SECONDS: ${SHR_DAILY_RUN_LOCK_TTL_SECONDS:-21600}
+  SHR_DAILY_HEALTH_MAX_AGE_HOURS: ${SHR_DAILY_HEALTH_MAX_AGE_HOURS:-30}
+  SHR_DAILY_TOP_OPPORTUNITIES_LIMIT: ${SHR_DAILY_TOP_OPPORTUNITIES_LIMIT:-10}
+  SHR_DAILY_MIN_DECISION_COVERAGE_RATIO: ${SHR_DAILY_MIN_DECISION_COVERAGE_RATIO:-0.95}
+  SHR_DAILY_MAX_ATTEMPTS_PER_DAY: ${SHR_DAILY_MAX_ATTEMPTS_PER_DAY:-4}
+  SHR_DAILY_RETRY_INITIAL_DELAY_SECONDS: ${SHR_DAILY_RETRY_INITIAL_DELAY_SECONDS:-900}
+  SHR_DAILY_RETRY_MAX_DELAY_SECONDS: ${SHR_DAILY_RETRY_MAX_DELAY_SECONDS:-3600}
+  SHR_DAILY_SCHEDULE_TIME: ${SHR_DAILY_SCHEDULE_TIME:-02:00}
+  SHR_DAILY_TIMEZONE: ${SHR_DAILY_TIMEZONE:-Asia/Shanghai}
+  SHR_DAILY_RUN_ON_START: ${SHR_DAILY_RUN_ON_START:-false}
+  SHR_DAILY_CATCH_UP_ON_START: ${SHR_DAILY_CATCH_UP_ON_START:-true}
+  SHR_DAILY_ALERT_WEBHOOK_URL: ${SHR_DAILY_ALERT_WEBHOOK_URL:-}
+  SHR_DAILY_ALERT_WEBHOOK_BEARER_TOKEN: ${SHR_DAILY_ALERT_WEBHOOK_BEARER_TOKEN:-}
+  SHR_DAILY_RESULT_WEBHOOK_URL: ${SHR_DAILY_RESULT_WEBHOOK_URL:-}
+  SHR_DAILY_RESULT_WEBHOOK_BEARER_TOKEN: ${SHR_DAILY_RESULT_WEBHOOK_BEARER_TOKEN:-}
+  SHR_DAILY_RESULT_WEBHOOK_TIMEOUT_SECONDS: ${SHR_DAILY_RESULT_WEBHOOK_TIMEOUT_SECONDS:-10}
+  SHR_DAILY_RESULT_WEBHOOK_MAX_ATTEMPTS: ${SHR_DAILY_RESULT_WEBHOOK_MAX_ATTEMPTS:-3}
+  SHR_DAILY_ADVISORY_STATUS: ${SHR_DAILY_ADVISORY_STATUS:-RESEARCH_ONLY}
+  SHR_COLLECTOR_SOURCE: ${SHR_COLLECTOR_SOURCE:-sample_json}
+  SHR_COLLECTOR_ENDPOINT: ${SHR_COLLECTOR_ENDPOINT:-data/sample/example_source_listings.json}
+  SHR_COLLECTOR_CITY: ${SHR_COLLECTOR_CITY:-shanghai}
+  SHR_COLLECTOR_DISTRICT: ${SHR_COLLECTOR_DISTRICT:-}
+  SHR_COLLECTOR_SUBMARKET: ${SHR_COLLECTOR_SUBMARKET:-}
+  SHR_COLLECTOR_QUERY: ${SHR_COLLECTOR_QUERY:-}
+  SHR_COLLECTOR_REQUEST_TIMEOUT_SECONDS: ${SHR_COLLECTOR_REQUEST_TIMEOUT_SECONDS:-20}
+  SHR_COLLECTOR_MAX_ATTEMPTS: ${SHR_COLLECTOR_MAX_ATTEMPTS:-4}
+  SHR_COLLECTOR_AUTH_MODE: ${SHR_COLLECTOR_AUTH_MODE:-NONE}
+  SHR_COLLECTOR_BEARER_TOKEN: ${SHR_COLLECTOR_BEARER_TOKEN:-}
+  SHR_COLLECTOR_BASIC_USERNAME: ${SHR_COLLECTOR_BASIC_USERNAME:-}
+  SHR_COLLECTOR_BASIC_PASSWORD: ${SHR_COLLECTOR_BASIC_PASSWORD:-}
+  SHR_COLLECTOR_CUSTOM_HEADER_NAME: ${SHR_COLLECTOR_CUSTOM_HEADER_NAME:-}
+  SHR_COLLECTOR_CUSTOM_HEADER_VALUE: ${SHR_COLLECTOR_CUSTOM_HEADER_VALUE:-}
+  SHR_COLLECTOR_ALLOW_COMPLETE_WITHOUT_COVERAGE: ${SHR_COLLECTOR_ALLOW_COMPLETE_WITHOUT_COVERAGE:-false}
+  SHR_COLLECTOR_MIN_COMPLETE_ITEMS: ${SHR_COLLECTOR_MIN_COMPLETE_ITEMS:-1}
+  SHR_COLLECTOR_MIN_COMPLETE_COUNT_RATIO: ${SHR_COLLECTOR_MIN_COMPLETE_COUNT_RATIO:-0.5}
+  SHR_COLLECTOR_PARTNER_CSV_MAX_AGE_HOURS: ${SHR_COLLECTOR_PARTNER_CSV_MAX_AGE_HOURS:-36}
+  SHR_COLLECTOR_MAX_OBSERVATION_AGE_HOURS: ${SHR_COLLECTOR_MAX_OBSERVATION_AGE_HOURS:-36}
+  SHR_DISAPPEARANCE_FINAL_AFTER_RUNS: ${SHR_DISAPPEARANCE_FINAL_AFTER_RUNS:-2}
+  SHR_API_KEY: ${SHR_API_KEY:-dev-only-change-me}
+
+x-backend-service: &backend-service
+  build:
+    context: .
+    dockerfile: infra/docker/api.Dockerfile
+  environment: *backend-environment
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-shanghai_home_radar}
+      POSTGRES_USER: ${POSTGRES_USER:-radar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-radar}
+    ports:
+      - "${POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backup-runner:
+    image: postgis/postgis:16-3.4
+    entrypoint: ["bash", "/opt/home-radar/database_backup_scheduler.sh"]
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-shanghai_home_radar}
+      PGUSER: ${POSTGRES_USER:-radar}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-radar}
+      SHR_BACKUP_DIRECTORY: /backups
+      SHR_BACKUP_SCHEDULE_TIME: ${SHR_BACKUP_SCHEDULE_TIME:-01:00}
+      SHR_BACKUP_RUN_ON_START: ${SHR_BACKUP_RUN_ON_START:-false}
+      SHR_BACKUP_CATCH_UP_ON_START: ${SHR_BACKUP_CATCH_UP_ON_START:-true}
+      SHR_BACKUP_RETENTION_DAYS: ${SHR_BACKUP_RETENTION_DAYS:-14}
+      SHR_DAILY_TIMEZONE: ${SHR_DAILY_TIMEZONE:-Asia/Shanghai}
+    volumes:
+      - ./scripts/database_backup.sh:/opt/home-radar/database_backup.sh:ro
+      - ./scripts/database_backup_scheduler.sh:/opt/home-radar/database_backup_scheduler.sh:ro
+      - database_backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -f /backups/.scheduler-heartbeat && find /backups/.scheduler-heartbeat -mmin -3 -print -quit | grep -q .
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  restore-drill:
+    image: postgis/postgis:16-3.4
+    profiles: ["operations"]
+    entrypoint: ["bash", "/opt/home-radar/database_restore_drill.sh"]
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-shanghai_home_radar}
+      PGUSER: ${POSTGRES_USER:-radar}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-radar}
+      SHR_BACKUP_DIRECTORY: /backups
+      SHR_RESTORE_BACKUP_PATH: /backups/latest.dump
+    volumes:
+      - ./scripts/database_restore_drill.sh:/opt/home-radar/database_restore_drill.sh:ro
+      - database_backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *backend-service
+    volumes:
+      - ./data/raw:/app/data/raw:ro
+      - ./data/inbox:/app/data/inbox:ro
+      - daily_reports:/app/data/exports/daily
+    command:
+      - sh
+      - -c
+      - alembic upgrade head && exec uvicorn home_radar_api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  worker:
+    <<: *backend-service
+    command:
+      - sh
+      - -c
+      - exec rq worker "$${SHR_COLLECTOR_QUEUE}" --url "$${SHR_REDIS_URL}"
+    volumes:
+      - ./data/inbox:/app/data/inbox:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os; from redis import Redis; assert Redis.from_url(os.environ['SHR_REDIS_URL']).ping()"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  market-worker:
+    <<: *backend-service
+    command:
+      - sh
+      - -c
+      - exec rq worker "$${SHR_MARKET_QUEUE}" --url "$${SHR_REDIS_URL}" --with-scheduler
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os; from redis import Redis; assert Redis.from_url(os.environ['SHR_REDIS_URL']).ping()"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  market-scheduler:
+    <<: *backend-service
+    command: ["home-radar-market-schedule"]
+    restart: "no"
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+  valuation-worker:
+    <<: *backend-service
+    command:
+      - sh
+      - -c
+      - exec rq worker "$${SHR_VALUATION_QUEUE}" --url "$${SHR_REDIS_URL}"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+  future-worker:
+    <<: *backend-service
+    command:
+      - sh
+      - -c
+      - exec rq worker "$${SHR_FUTURE_QUEUE}" --url "$${SHR_REDIS_URL}"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+  decision-worker:
+    <<: *backend-service
+    command:
+      - sh
+      - -c
+      - exec rq worker "$${SHR_DECISION_QUEUE}" --url "$${SHR_REDIS_URL}"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+  daily-runner:
+    <<: *backend-service
+    command: ["python", "scripts/daily_scheduler.py"]
+    volumes:
+      - ./data/raw:/app/data/raw:ro
+      - ./data/inbox:/app/data/inbox:ro
+      - ./P57_CALIBRATION_SET_A_REPORT.md:/app/P57_CALIBRATION_SET_A_REPORT.md:ro
+      - daily_reports:/app/data/exports/daily
+    depends_on:
+      backup-runner:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+      market-worker:
+        condition: service_started
+      valuation-worker:
+        condition: service_started
+      future-worker:
+        condition: service_started
+      decision-worker:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://api:8000/api/v1/operations/daily/health', timeout=3)"
+      interval: 5m
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      API_INTERNAL_URL: http://api:8000
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  daily_reports:
+  database_backups:

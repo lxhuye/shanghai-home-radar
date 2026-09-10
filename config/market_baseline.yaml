@@ -1,0 +1,66 @@
+calculation_version: p3.0.1
+configuration_version: market-baseline-2026-09-02
+
+windows_days: [30, 90, 180, 365]
+
+target_areas:
+  - district: "徐汇"
+    submarkets: []
+  - district: "闵行"
+    submarkets: []
+  - district: "普陀"
+    submarkets: ["真如"]
+  - district: "杨浦"
+    submarkets: []
+  - district: "浦东"
+    submarkets: []
+
+area_buckets:
+  - {name: "<40", maximum: 40}
+  - {name: "40-50", minimum: 40, maximum: 50}
+  - {name: "50-65", minimum: 50, maximum: 65}
+  - {name: "65-80", minimum: 65, maximum: 80}
+  - {name: "80-100", minimum: 80, maximum: 100}
+  - {name: "100+", minimum: 100}
+
+outliers:
+  minimum_sample_size: 8
+  robust_z_threshold: 3.5
+  iqr_multiplier: 1.5
+
+confidence:
+  absolute_minimum_samples: 3
+  target_sample_size: 20
+  target_source_count: 3
+  weights:
+    sample_size: 0.25
+    freshness: 0.20
+    source_diversity: 0.15
+    coverage: 0.15
+    outlier_stability: 0.10
+    continuity: 0.15
+  thresholds:
+    high: 0.80
+    medium: 0.60
+    low: 0.35
+
+liquidity:
+  minimum_available_weight: 0.50
+  active_inventory_target: 25
+  new_listing_target: 10
+  listing_exit_target: 8
+  days_on_market_target: 90
+  weights:
+    inventory_depth: 0.20
+    new_listing_velocity: 0.15
+    listing_exit_velocity: 0.15
+    days_on_market_speed: 0.15
+    price_stability: 0.15
+    relisting_stability: 0.10
+    buyer_pool_depth: 0.10
+
+fallback:
+  community_minimum_samples: 8
+  submarket_minimum_samples: 6
+  district_minimum_samples: 5
+  prior_strength: 10
